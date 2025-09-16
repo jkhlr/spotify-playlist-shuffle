@@ -105,4 +105,4 @@ def shuffle_playlist_tracks(playlist_id):
 
 if __name__ == "__main__":
     playlist_id = os.getenv('PLAYLIST_ID')
-    shuffle_playlist_tracks(playlist_id)
+    print(shuffle_playlist_tracks(playlist_id))
