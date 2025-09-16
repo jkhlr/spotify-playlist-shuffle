@@ -1,0 +1,68 @@
+name: Daily Spotify Shuffle
+
+on:
+  schedule:
+    # Runs every day at 06:00 UTC (adjust as desired)
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      playlist_id:
+        description: "Playlist ID to shuffle (optional; falls back to secret)"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-shuffle
+  cancel-in-progress: false
+
+jobs:
+  shuffle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      # Secrets (never echo these). Provided to your code as environment variables.
+      CLIENT_ID: ${{ secrets.CLIENT_ID }}
+      CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+      REDIRECT_URI: ${{ secrets.REDIRECT_URI }}
+      REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
+      # Prefer passing playlist via workflow input; otherwise use secret PLAYLIST_ID
+      PLAYLIST_ID: ${{ inputs.playlist_id || secrets.PLAYLIST_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Setup Python with uv
+        run: |
+          uv venv
+          source .venv/bin/activate
+          echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
+          echo "$VIRTUAL_ENV/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: uv pip sync uv.lock
+
+      - name: Run shuffle
+        id: run
+        env:
+          CLIENT_ID: ${{ env.CLIENT_ID }}
+          CLIENT_SECRET: ${{ env.CLIENT_SECRET }}
+          REDIRECT_URI: ${{ env.REDIRECT_URI }}
+          REFRESH_TOKEN: ${{ env.REFRESH_TOKEN }}
+          PLAYLIST_ID: ${{ env.PLAYLIST_ID }}
+        run: python shuffle_playlist.py
+
+      - name: Post result
+        if: always()
+        run: |
+          echo "Job conclusion: ${{ job.status }}"
