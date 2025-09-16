@@ -10,7 +10,6 @@ on:
         description: "Playlist ID to shuffle (optional; falls back to secret)"
         required: false
         type: string
-        default: ""
 
 permissions:
   contents: read
@@ -22,15 +21,14 @@ concurrency:
 jobs:
   shuffle:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
 
     env:
-      # Secrets (never echo these). Provided to your code as environment variables.
       CLIENT_ID: ${{ vars.CLIENT_ID }}
       CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
       REDIRECT_URI: ${{ vars.REDIRECT_URI }}
       REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
-      # Prefer passing playlist via workflow input; otherwise use secret PLAYLIST_ID
+      # Prefer passing playlist via workflow input; otherwise use variable PLAYLIST_ID
       PLAYLIST_ID: ${{ inputs.playlist_id || vars.PLAYLIST_ID }}
 
     steps:
@@ -51,8 +49,3 @@ jobs:
           REFRESH_TOKEN: ${{ env.REFRESH_TOKEN }}
           PLAYLIST_ID: ${{ env.PLAYLIST_ID }}
         run: uv run python shuffle_playlist.py
-
-      - name: Post result
-        if: always()
-        run: |
-          echo "Job conclusion: ${{ job.status }}"
