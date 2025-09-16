@@ -42,16 +42,6 @@ jobs:
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
-      - name: Setup Python with uv
-        run: |
-          uv venv
-          source .venv/bin/activate
-          echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
-          echo "$VIRTUAL_ENV/bin" >> $GITHUB_PATH
-
-      - name: Install dependencies
-        run: uv pip sync uv.lock
-
       - name: Run shuffle
         id: run
         env:
@@ -60,7 +50,7 @@ jobs:
           REDIRECT_URI: ${{ env.REDIRECT_URI }}
           REFRESH_TOKEN: ${{ env.REFRESH_TOKEN }}
           PLAYLIST_ID: ${{ env.PLAYLIST_ID }}
-        run: python shuffle_playlist.py
+        run: uv run python shuffle_playlist.py
 
       - name: Post result
         if: always()
