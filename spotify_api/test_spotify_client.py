@@ -10,10 +10,10 @@ from spotify_api.spotify_client import (
 def mock_spotify_client(monkeypatch):
     """Fixture that provides a mocked SpotifyClient."""
     client = SpotifyClient()
-    client.sp = MagicMock()
+    client.spotify = MagicMock()
 
     # Mock playlist_tracks response
-    client.sp.playlist_tracks.return_value = {
+    client.spotify.playlist_tracks.return_value = {
         'items': [
             {'track': {'uri': f'spotify:track:{i}'}} for i in range(5)
         ],
@@ -64,7 +64,7 @@ def test_both_shuffle_and_restore_failure(mock_spotify_client):
 def test_empty_playlist(mock_spotify_client):
     """Test handling of empty playlists."""
     # Override the mock to return an empty playlist
-    mock_spotify_client.sp.playlist_tracks.return_value = {
+    mock_spotify_client.spotify.playlist_tracks.return_value = {
         'items': [],
         'next': None
     }
@@ -75,8 +75,8 @@ def test_empty_playlist(mock_spotify_client):
 
 def test_get_playlists(mock_spotify_client):
     """Test getting user playlists."""
-    mock_spotify_client.sp.current_user.return_value = {'id': 'test_user'}
-    mock_spotify_client.sp.current_user_playlists.return_value = {
+    mock_spotify_client.spotify.current_user.return_value = {'id': 'test_user'}
+    mock_spotify_client.spotify.current_user_playlists.return_value = {
         'items': [
             {'name': 'Playlist 1', 'id': '1', 'owner': {'id': 'test_user'}},
             {'name': 'Playlist 2', 'id': '2', 'owner': {'id': 'other_user'}},

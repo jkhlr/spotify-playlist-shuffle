@@ -1,6 +1,7 @@
 import argparse
 import os
 import random
+from functools import cached_property
 from pprint import pprint
 
 import spotipy
@@ -28,36 +29,37 @@ class PlaylistRestoreError(Exception):
 
 class SpotifyClient:
     """Client for interacting with Spotify API."""
-
-    def __init__(self):
-        """Initialize Spotify client using a refresh token."""
+    
+    @cached_property
+    def spotify(self):
+        """Initialize the Spotify client using a refresh token."""
         # Basic OAuth configuration – required for token refresh.
         sp_oauth = SpotifyOAuth(client_id=os.getenv('CLIENT_ID'), client_secret=os.getenv('CLIENT_SECRET'),
                                 redirect_uri=os.getenv('REDIRECT_URI'),
                                 scope='playlist-modify-public playlist-modify-private user-read-private',
                                 cache_handler=spotipy.cache_handler.MemoryCacheHandler())
-
+        
         refresh_token = os.getenv('REFRESH_TOKEN')
         if not refresh_token:
             raise RuntimeError("REFRESH_TOKEN not found in environment. "
                                "Set the REFRESH_TOKEN variable to a valid Spotify refresh token.")
-
+        
         # Exchange the refresh token for a new access token.
         token_info = sp_oauth.refresh_access_token(refresh_token)
         access_token = token_info.get('access_token')
         if not access_token:
             raise RuntimeError("Failed to obtain an access token using the refresh token.")
-
+        
         # Store Spotipy client authenticated with the fresh access token.
-        self.sp = spotipy.Spotify(auth=access_token)
+        return spotipy.Spotify(auth=access_token)
 
     def get_playlists(self):
         """Get a list of all playlists owned by the authenticated user."""
-        user = self.sp.current_user()
-        results = self.sp.current_user_playlists()
+        user = self.spotify.current_user()
+        results = self.spotify.current_user_playlists()
         playlists = results['items']
         while results['next']:
-            results = self.sp.next(results)
+            results = self.spotify.next(results)
             playlists.extend(results['items'])
         return [playlist for playlist in playlists if playlist['owner']['id'] == user['id']]
 
@@ -68,17 +70,17 @@ class SpotifyClient:
             playlist_id: ID of the playlist to update
             track_uris: List of Spotify track URIs
         """
-        self.sp.playlist_replace_items(playlist_id, [])
+        self.spotify.playlist_replace_items(playlist_id, [])
         for i in range(0, len(track_uris), 100):
-            self.sp.playlist_add_items(playlist_id, track_uris[i:i + 100])
+            self.spotify.playlist_add_items(playlist_id, track_uris[i:i + 100])
 
     def shuffle_playlist_tracks(self, playlist_id):
         """Shuffle tracks in a Spotify playlist."""
         # Get current tracks
-        results = self.sp.playlist_tracks(playlist_id)
+        results = self.spotify.playlist_tracks(playlist_id)
         tracks = results['items']
         while results['next']:
-            results = self.sp.next(results)
+            results = self.spotify.next(results)
             tracks.extend(results['items'])
 
         if not tracks:
