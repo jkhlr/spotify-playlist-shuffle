@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Playlists</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        img { height: 50px; vertical-align: middle; }
+    </style>
+</head>
+<body>
+    <h1>Your Playlists</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Cover</th>
+                <th>Name</th>
+                <th>ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for playlist in playlists %}
+            <tr>
+                <td>
+                    {% if playlist.images and playlist.images.0.url %}
+                        <img src="{{ playlist.images.0.url }}" alt="cover">
+                    {% endif %}
+                </td>
+                <td>{{ playlist.name }}</td>
+                <td>{{ playlist.id }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
+

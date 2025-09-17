@@ -1,5 +1,8 @@
-from django.http import HttpResponse
+from django.shortcuts import render
+from spotify_api.spotify_client import SpotifyClient
 
 
 def index(request):
-    return HttpResponse("shuffle index")
+    client = SpotifyClient()
+    playlists = client.get_playlists()
+    return render(request, 'shuffle/index.html', {'playlists': playlists})
