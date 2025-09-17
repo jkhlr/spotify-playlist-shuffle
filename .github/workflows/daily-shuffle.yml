@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       playlist_id:
-        description: "Playlist ID to shuffle (optional; falls back to secret)"
+        description: "Playlist ID to shuffle (optional; falls back to variable PLAYLIST_ID)"
         required: false
         type: string
 
@@ -48,4 +48,4 @@ jobs:
           REDIRECT_URI: ${{ env.REDIRECT_URI }}
           REFRESH_TOKEN: ${{ env.REFRESH_TOKEN }}
           PLAYLIST_ID: ${{ env.PLAYLIST_ID }}
-        run: uv run python shuffle_playlist.py
+        run: uv run python spotify_api/spotify_client.py --shuffle ${PLAYLIST_ID}
