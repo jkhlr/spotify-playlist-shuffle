@@ -61,6 +61,13 @@ def test_both_shuffle_and_restore_failure(mock_spotify_client):
     assert "Simulated failure" in str(error.shuffle_error)
     assert "Simulated failure" in str(error.restore_error)
 
+    error_message = str(error)
+    assert "spotify:track:0" in error_message
+    assert "spotify:track:1" in error_message
+    assert "spotify:track:2" in error_message
+    assert "spotify:track:3" in error_message
+    assert "spotify:track:4" in error_message
+
 def test_empty_playlist(mock_spotify_client):
     """Test handling of empty playlists."""
     # Override the mock to return an empty playlist

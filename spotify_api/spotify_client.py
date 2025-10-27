@@ -19,12 +19,14 @@ class PlaylistShuffleError(Exception):
 class PlaylistRestoreError(Exception):
     """Raised when restoring a playlist fails after a shuffle error."""
 
-    def __init__(self, restore_error, shuffle_error):
+    def __init__(self, restore_error, shuffle_error, original_track_uris):
         self.restore_error = restore_error
         self.shuffle_error = shuffle_error
+        self.original_track_uris = original_track_uris
         super().__init__(f"Failed to restore playlist after shuffle error.\n"
                          f"Restore error: {restore_error}\n"
-                         f"Shuffle error: {shuffle_error}")
+                         f"Shuffle error: {shuffle_error}\n"
+                         f"Original track URIs: {original_track_uris}")
 
 
 class SpotifyClient:
@@ -98,7 +100,7 @@ class SpotifyClient:
             try:
                 self.update_playlist_tracks(playlist_id, original_track_uris)
             except Exception as restore_error:
-                raise PlaylistRestoreError(restore_error, shuffle_error) from restore_error
+                raise PlaylistRestoreError(restore_error, shuffle_error, original_track_uris) from restore_error
 
             raise PlaylistShuffleError("Failed to shuffle playlist") from shuffle_error
 
