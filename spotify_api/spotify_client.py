@@ -90,8 +90,15 @@ class SpotifyClient:
 
         # Extract track URIs and create backup
         original_track_uris = [item['track']['uri'] for item in tracks]
-        shuffled_track_uris = original_track_uris.copy()
-        random.shuffle(shuffled_track_uris)
+
+        # Shuffle tracks, making sure that tracks having appeared in the first
+        # third of the list are placed at the end of the new list.
+        third = len(original_track_uris) // 3
+        first_third = original_track_uris[:third]
+        rest = original_track_uris[third:]
+        random.shuffle(first_third)
+        random.shuffle(rest)
+        shuffled_track_uris = rest + first_third
 
         try:
             self.update_playlist_tracks(playlist_id, shuffled_track_uris)
