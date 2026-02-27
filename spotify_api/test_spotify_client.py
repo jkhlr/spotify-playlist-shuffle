@@ -12,8 +12,8 @@ def mock_spotify_client(monkeypatch):
     client = SpotifyClient()
     client.spotify = MagicMock()
 
-    # Mock playlist_tracks response
-    client.spotify.playlist_tracks.return_value = {
+    # Mock playlist_items response
+    client.spotify.playlist_items.return_value = {
         'items': [
             {'track': {'uri': f'spotify:track:{i}'}} for i in range(5)
         ],
@@ -71,7 +71,7 @@ def test_both_shuffle_and_restore_failure(mock_spotify_client):
 def test_empty_playlist(mock_spotify_client):
     """Test handling of empty playlists."""
     # Override the mock to return an empty playlist
-    mock_spotify_client.spotify.playlist_tracks.return_value = {
+    mock_spotify_client.spotify.playlist_items.return_value = {
         'items': [],
         'next': None
     }

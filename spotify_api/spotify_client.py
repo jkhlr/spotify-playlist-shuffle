@@ -78,8 +78,8 @@ class SpotifyClient:
 
     def shuffle_playlist_tracks(self, playlist_id):
         """Shuffle tracks in a Spotify playlist."""
-        # Get current tracks
-        results = self.spotify.playlist_tracks(playlist_id)
+        # Get current playlist items (tracks)
+        results = self.spotify.playlist_items(playlist_id)
         tracks = results['items']
         while results['next']:
             results = self.spotify.next(results)
