@@ -1,0 +1,46 @@
+name: Spotify Update Refresh Token
+
+# Step 2 of refreshing the Spotify token.
+# After running "Spotify Auth URL" and approving access, run this workflow with
+# the URL you were redirected to. It exchanges the authorization code for a new
+# refresh token and writes it to the REFRESH_TOKEN secret.
+#
+# Requires a GH_PAT secret: a Personal Access Token allowed to write repository
+# Actions secrets (a fine-grained PAT with "Secrets" repository permission set
+# to Read and write, or a classic PAT with the "repo" scope). The built-in
+# GITHUB_TOKEN cannot write secrets, so it will not work here.
+
+on:
+  workflow_dispatch:
+    inputs:
+      redirect_url:
+        description: "The full URL you were redirected to (contains ?code=...)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  update-token:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    env:
+      CLIENT_ID: ${{ vars.CLIENT_ID }}
+      CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+      REDIRECT_URI: ${{ vars.REDIRECT_URI }}
+      REDIRECT_URL: ${{ inputs.redirect_url }}
+      GH_PAT: ${{ secrets.GH_PAT }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Exchange code and update REFRESH_TOKEN secret
+        run: uv run python spotify_api/update_refresh_token.py

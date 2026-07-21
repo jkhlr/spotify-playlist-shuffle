@@ -1,0 +1,39 @@
+name: Spotify Auth URL
+
+# Step 1 of refreshing the Spotify token.
+# Run this workflow manually, then open the authorization URL printed in the
+# logs, approve access, and copy the URL you get redirected to. Feed that
+# redirect URL into the "Spotify Update Refresh Token" workflow.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  auth-url:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    env:
+      CLIENT_ID: ${{ vars.CLIENT_ID }}
+      CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+      REDIRECT_URI: ${{ vars.REDIRECT_URI }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Print authorization URL
+        run: |
+          echo "Open the URL below in a browser, approve access, then copy the"
+          echo "URL you get redirected to and run the 'Spotify Update Refresh"
+          echo "Token' workflow with it as input."
+          echo ""
+          uv run python spotify_api/get_auth_url.py
